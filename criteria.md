@@ -46,11 +46,11 @@ Two things worth knowing before you pick numbers:
 
 <!-- Your criterion. It must name a number. -->
 
-
+Out of 10 pieces of human-written text, at most 2 should be labeled high-confidence AI.
 
 **Why this target:**
 
-
+I chose at most 2 out of 10 because false positives can wrongly accuse real writers, so I want the false-positive rate to stay low while allowing for some classification errors.
 
 ---
 
@@ -58,10 +58,11 @@ Two things worth knowing before you pick numbers:
 
 <!-- Your criterion. -->
 
-
+Clearly AI-written and clearly human-written text should have a confidence score difference of at least 0.70.
 
 **Why this target:**
 
+I chose 0.70 because clearly AI-written and clearly human-written text should produce noticeably different scores. A large difference would show that the system can clearly separate the two types of writing.
 
 
 ---
@@ -70,9 +71,12 @@ Two things worth knowing before you pick numbers:
 
 <!-- Your criterion. -->
 
+All 3 labels should be reachable when testing the system with different inputs.
 
 
 **Why this target:**
+
+All 3 labels should be reachable so the system can represent AI, human, and uncertain cases instead of forcing every input into only one or two categories.
 
 
 
@@ -82,11 +86,11 @@ Two things worth knowing before you pick numbers:
 
 <!-- Your criterion. -->
 
-
+100% of valid appeals should be recorded and change the content status to under_review.
 
 **Why this target:**
 
-
+Every valid appeal should be recorded so that writers have a reliable way to challenge a decision and have their content reviewed.
 
 ---
 
@@ -94,10 +98,11 @@ Two things worth knowing before you pick numbers:
 
 <!-- Your criterion. -->
 
-
+100% of requests with missing or empty text should be rejected without crashing the service.
 
 **Why this target:**
 
+Invalid input should not cause the service to crash. Rejecting missing or empty text allows the system to handle bad input safely and continue serving other requests.
 
 
 ---
