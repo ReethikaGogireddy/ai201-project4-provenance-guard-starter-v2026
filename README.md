@@ -40,6 +40,13 @@
      Six or seven steps — this is the trace you wrote in Milestone 1. -->
 
 
+1. A writer submits their text and creator ID through the `POST /submit` endpoint.
+2. `detector.py` analyzes the text using the local model and produces the model signal score.
+3. `stylometry.py` analyzes writing characteristics such as sentence length, word variety, and punctuation and produces the style signal score.
+4. `scoring.py::combine_signals` combines the two signal scores into one confidence score.
+5. `scoring.py::score_to_label` maps the confidence score to one of three labels: high-confidence AI, high-confidence human, or unsure.
+6. `audit.py` records the submission, signal scores, decision, and status in the audit log.
+7. The `/submit` endpoint returns the content ID, guess, confidence score, signal scores, and reader-facing label as JSON.
 
 ---
 
@@ -54,18 +61,71 @@
 ### Signal one — the model signal
 
 **What it measures:**
+It uses a local model to analyze the text and produce a score based on how predictable the writing is.
 
 **Why that might differ between human and AI writing:**
+AI-generated text may be more predictable because language models generate text based on likely word patterns.
 
 **What it can't see:**
+Human writing can be predictable, but edited AI writing can appear less predictable.
 
 ### Signal two — the style signal
 
 **What it measures:**
+It measures writing features such as sentence-length variation, word variety, and punctuation.
 
 **Why that might differ between human and AI writing:**
+Human and AI writing may have different patterns in sentence structure, vocabulary, and punctuation.
 
 **What it can't see:**
+It cannot determine authorship from style alone. A human and an AI can produce similar writing patterns. Since, gpt are also trained on human writing it's style may not be completely different from the human.
+
+**False-positive trace:**
+
+Human submits real writing → /submit receives it → model and style signals analyze it → combined score incorrectly leans toward AI → writer sees the AI label → writer disagrees → writer submits an appeal → content status changes to under_review.
+
+### Endpoint 1 — POST /submit
+
+**Input:**
+```json
+{
+  "text": "The writing submitted by the user",
+  "creator_id": "user123"
+}
+```
+
+**Output:**
+```json
+{
+  "content_id": "content123",
+  "guess": "human or AI",
+  "confidence": 0.0,
+  "label": "reader-facing label",
+  "model_score": 0.0,
+  "style_score": 0.0
+}
+```
+
+`text` contains the writing to analyze, and `creator_id` identifies the writer. The response gives the submission an ID and returns the system's guess, confidence, label, and the two signal scores.
+
+
+### Endpoint 2 — POST /appeal
+
+**Input:**
+```json
+{
+  "content_id": "content123",
+  "reasoning": "Why the writer thinks the decision is incorrect"
+}
+```
+
+**Output:**
+```text
+Confirmation that the appeal was recorded
+Status: under_review
+```
+
+`content_id` identifies the original submission, and the reasoning explains why the writer disagrees with the decision. The appeal is recorded and the item's status changes to `under_review`.
 
 ### The combining rule
 
