@@ -31,6 +31,8 @@ from flask import Flask, jsonify, request
 import audit
 import detector
 import config
+import scoring
+import stylometry
 
 app = Flask(__name__)
 
@@ -205,22 +207,29 @@ def submit():
     text = payload.get("text", "")
     creator_id = payload.get("creator_id", "")
 
-    model_score = detector.model_signal(text)
 
     content_id = str(uuid.uuid4())
 
     # TODO: delete this and build the route.
     guess = "placeholder"
-    confidence = 0.0
     label = "placeholder"
+
+    model_score = detector.model_signal(text)
+
+    style_score = stylometry.style_signal(text)
+
+    confidence = scoring.combine_signals(
+    model_score,
+    style_score
+    )
 
     audit.log_decision(
         content_id=content_id,
         creator_id=creator_id,
         guess=guess,
         model_score=model_score,
-        style_score=None,
-        combined_score=None,
+        style_score=style_score,
+        combined_score=confidence,
         label=label,
         status="decided",
     )
@@ -231,7 +240,7 @@ def submit():
         "confidence": confidence,
         "label": label,
         "model_score": model_score,
-        "style_score": 0.0
+        "style_score": style_score
     })
 
 

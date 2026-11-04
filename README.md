@@ -134,7 +134,12 @@ Status: under_review
 
 **The rule:**
 
+I use a weighted average of the model signal and the style signal. I give the model signal more weight because my testing showed that the style signal did not separate human and AI writing as clearly. When the two signals disagree, the combined score moves toward the middle to represent the uncertainty.
+
 **The numbers:**
+
+Model signal: 60%
+Style signal: 40%
 
 **Where it lives:** `scoring.py::combine_signals`
 
@@ -143,7 +148,7 @@ Status: under_review
 
 **A case where my two signals split, and what my rule does with it:**
 
-
+For one AI-generated machine learning sample, the model signal was 0.6058, while the style signal was lower and leaned more toward human writing. The weighted combination moved the final score closer to the middle rather than relying completely on either signal.
 
 ---
 

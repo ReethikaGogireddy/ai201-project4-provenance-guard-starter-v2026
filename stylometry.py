@@ -65,7 +65,21 @@ def sentence_length_spread(text: str) -> float:
     before the attack set decides for you.
     """
     # TODO: replace this
-    return 0.0
+    sentence_list = sentences(text)
+
+    lengths = [len(words(sentence)) for sentence in sentence_list]
+
+    # stdev requires at least two sentences
+    if len(lengths) < 2:
+        return 0.0
+
+    mean_length = statistics.mean(lengths)
+
+    if mean_length == 0:
+        return 0.0
+
+    # Normalize so texts of different lengths are more comparable
+    return statistics.stdev(lengths) / mean_length
 
 
 def type_token_ratio(text: str) -> float:
@@ -81,7 +95,14 @@ def type_token_ratio(text: str) -> float:
     that alone can look like a signal.
     """
     # TODO: replace this
-    return 0.0
+    word_list = words(text)
+
+    if not word_list:
+        return 0.0
+
+    unique_words = set(word_list)
+
+    return len(unique_words) / len(word_list)
 
 
 def punctuation_density(text: str) -> float:
@@ -95,7 +116,11 @@ def punctuation_density(text: str) -> float:
         writers.
     """
     # TODO: replace this
-    return 0.0
+    if not text:
+        return 0.0
+
+    punctuation = re.findall(r"[,.!?;:—-]", text)
+    return len(punctuation) / len(text)
 
 
 # ── Combining them ───────────────────────────────────────────────────────────
@@ -123,7 +148,24 @@ def style_signal(text: str) -> float:
     to signal one, and it is plain writing that gets accused.
     """
     # TODO: replace this
-    return 0.5
+    spread = sentence_length_spread(text)
+    ttr = type_token_ratio(text)
+    punct = punctuation_density(text)
+
+    # Convert each feature to a 0-1 AI-ish score.
+    spread_ai = 1.0 - min(spread, 1.0)
+    ttr_ai = 1.0 - ttr
+
+    # Treat 5% punctuation density as the top of our scale.
+    punct_ai = min(punct / 0.05, 1.0)
+
+    # Give each measure equal weight.
+    score = (
+        0.6 * spread_ai +
+        0.4 * ttr_ai
+    )
+
+    return max(0.0, min(score, 1.0))
 
 
 if __name__ == "__main__":
