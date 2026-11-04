@@ -184,11 +184,18 @@ Status: under_review
 ```bash
 $ curl -X POST http://127.0.0.1:5000/submit \
   -H "Content-Type: application/json" \
-  -d '{"text": "...", "creator_id": "..."}'
+  -d '{"text":"This is my test writing.","creator_id":"user1"}'
 ```
 
 ```json
-
+{
+  "confidence": 0.0,
+  "content_id": "39b6f0de-1e8f-47e5-9b8d-d7f163da3175",
+  "guess": "placeholder",
+  "label": "placeholder",
+  "model_score": 0.0699,
+  "style_score": 0.0
+}
 ```
 
 **An appeal**
@@ -206,11 +213,26 @@ $ curl -X POST http://127.0.0.1:5000/appeal \
 **What the log shows afterwards**
 
 ```bash
-$ curl "http://127.0.0.1:5000/log?limit=3"
+$ curl http://127.0.0.1:5000/log
 ```
 
 ```json
-
+{
+  "count": 1,
+  "entries": [
+    {
+      "combined_score": null,
+      "content_id": "39b6f0de-1e8f-47e5-9b8d-d7f163da3175",
+      "creator_id": "user1",
+      "guess": "placeholder",
+      "label": "placeholder",
+      "model_score": 0.0699,
+      "status": "decided",
+      "style_score": null,
+      "timestamp": "2026-11-04T00:07:10+00:00"
+    }
+  ]
+}
 ```
 
 ---

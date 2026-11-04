@@ -29,6 +29,7 @@ import uuid
 from flask import Flask, jsonify, request
 
 import audit
+import detector
 import config
 
 app = Flask(__name__)
@@ -201,15 +202,37 @@ def submit():
     """
     payload = request.get_json(silent=True) or {}
 
+    text = payload.get("text", "")
+    creator_id = payload.get("creator_id", "")
+
+    model_score = detector.model_signal(text)
+
+    content_id = str(uuid.uuid4())
+
     # TODO: delete this and build the route.
+    guess = "placeholder"
+    confidence = 0.0
+    label = "placeholder"
+
+    audit.log_decision(
+        content_id=content_id,
+        creator_id=creator_id,
+        guess=guess,
+        model_score=model_score,
+        style_score=None,
+        combined_score=None,
+        label=label,
+        status="decided",
+    )
+
     return jsonify({
-        "error": "not_implemented",
-        "message": "POST /submit isn't built yet — see the TODO in app.py.",
-        "you_sent": {
-            "text_length": len(payload.get("text", "")),
-            "creator_id": payload.get("creator_id"),
-        },
-    }), 501
+        "content_id": content_id,
+        "guess": guess,
+        "confidence": confidence,
+        "label": label,
+        "model_score": model_score,
+        "style_score": 0.0
+    })
 
 
 @app.post("/appeal")
