@@ -586,20 +586,81 @@ Mechanism: Invalid inputs were not validated before scoring, causing some to be 
 ## The Improvement
 
 **What I changed:**
+I added input validation in /submit to reject missing, empty, and non-string text with a 400 response before scoring.
 
 **Which diagnosis pointed at it:**
-
+Criterion 5 and the malformed-input attacks showed that invalid text reached the detector and caused errors or crashes.
 ### Attack Run — After
 
 <!-- Same format. `run_attacks.py --label after` -->
 
+### Attack Run — After
+
+| ID | Family | Targeting | Status | Content ID | Guess | Score | Verdict |
+|---|---|---|---|---|---|---|---|
+| EV01 | evasion | signal two: typos raise word variety | 200 | `ad8261bd-f69c-428f-baab-1fcff372775c` | human | 0.320 | BROKE |
+| EV02 | evasion | signal two: broken-up sentences raise length spread | 200 | `1404d31c-f27c-45f9-9105-312234dac284` | unsure | 0.421 | BROKE |
+| EV03 | evasion | signal two: a pasted quotation changes the shape | 200 | `1a1f647a-dcbe-44fb-9deb-2854786b8296` | unsure | 0.559 | BROKE |
+| EV04 | evasion | signal one: unusual words raise perplexity | 200 | `23793373-eb12-478d-af8e-d6ef46c2c00d` | unsure | 0.586 | BROKE |
+| EV05 | evasion | both signals: heavy human editing pass | 200 | `303f0f6e-ffb5-486a-858e-00aa4ff61526` | human | 0.308 | BROKE |
+| EV06 | evasion | signal two: one very long sentence and one very short | 200 | `89356605-f250-482c-888f-c72c43995a9c` | unsure | 0.384 | BROKE |
+| EV07 | evasion | signal two: padding with punctuation | 200 | `73c718e2-0a24-45dd-afa0-a2c10151dd35` | unsure | 0.628 | BROKE |
+| EV08 | evasion | signal one: text below the token window | 200 | `f1b4464a-50a8-4c0d-a756-55244201d3e3` | human | 0.319 | BROKE |
+| EV09 | evasion | both: AI text with a human opening paragraph bolted on | 200 | `17af4700-f5d2-46f8-96a1-7427779e8b73` | unsure | 0.575 | BROKE |
+| EV10 | evasion | signal two: repeated stanza structure | 200 | `8dd449a1-d149-415c-8b77-58df66e3e3bf` | ai | 0.842 | HELD |
+| FP01 | false_positive | plain, clear human writing with no flourishes | 200 | `9fddbb69-7402-4400-a639-d2eacbb2c793` | unsure | 0.547 | HELD |
+| FP02 | false_positive | human writing in a formal register | 200 | `96743b49-6a40-4b8d-9732-588ca55e4399` | ai | 0.672 | BROKE |
+| FP03 | false_positive | a non-native English speaker writing carefully | 200 | `1d8edbab-ac3f-47e5-b8b6-c9ab9c049690` | ai | 0.689 | BROKE |
+| FP04 | false_positive | a student essay written to a rubric | 200 | `5cffc596-0718-4d00-8573-96718d1cefc9` | ai | 0.682 | BROKE |
+| FP05 | false_positive | technical documentation written by a person | 200 | `60766f03-62a5-4e88-a8c7-e5a6193b96ac` | ai | 0.720 | BROKE |
+| FP06 | false_positive | a person imitating a formal template | 200 | `0a6c7c6c-7d2c-47fa-ae48-baec9fee0566` | ai | 0.687 | BROKE |
+| FP07 | false_positive | human writing that repeats a phrase deliberately | 200 | `4ff30bde-d410-4fba-9180-152b4766dc22` | ai | 0.680 | BROKE |
+| FP08 | false_positive | very short genuine human submission | 200 | `75ebb1d1-4a1b-40cc-99b5-9716c43776c5` | human | 0.329 | HELD |
+| PI01 | prompt_injection | instruction to ignore the check | 200 | `7f733b76-f192-4158-b06f-80ff313ac386` | unsure | 0.369 | HELD |
+| PI02 | prompt_injection | instruction disguised as a system message | 200 | `5ad032fe-5f04-44df-a17a-8bb19ab44694` | human | 0.213 | HELD |
+| PI03 | prompt_injection | instruction wrapped in the writer's voice | 200 | `a5875e1e-a799-409c-a604-2300703d59fb` | unsure | 0.529 | HELD |
+| PI04 | prompt_injection | attempt to make the label text hostile | 200 | `8e6d9474-757c-493c-bdfa-72416baec445` | unsure | 0.467 | HELD |
+| PI05 | prompt_injection | attempt to inject into the audit log | 200 | `789ae7e7-7889-41a7-89c5-ac95146d0944` | unsure | 0.516 | HELD |
+| PI06 | prompt_injection | instruction plus real human text | 200 | `46494f60-baa7-4908-80fa-dda242790311` | unsure | 0.515 | HELD |
+| MF01 | malformed | text is only whitespace | 400 | `—` | — | — | HELD |
+| MF02 | malformed | text is a single character | 500 | `—` | — | — | BROKE |
+| MF03 | malformed | text is control characters | 200 | `a2bb6875-24e3-4639-9555-83b68d2985e6` | human | 0.240 | BROKE |
+| MF04 | malformed | text is only punctuation | 200 | `4072aab1-a239-4e8f-afe7-a295de1f6659` | unsure | 0.407 | BROKE |
+| MF05 | malformed | text is a very long single word | 200 | `ffc22f94-a911-4b42-8e46-82d21f3fdab8` | ai | 0.839 | BROKE |
+| MF06 | malformed | text is emoji only | 200 | `6d2488cd-eb6e-4326-8ec1-8ffd0745f73f` | ai | 0.998 | BROKE |
+| MF07 | malformed | text is right-to-left script | 200 | `05811a2b-3c8e-46a4-bf9a-508a6c15763d` | ai | 0.944 | HELD |
+| MF08 | malformed | text is 60,000 characters | 200 | `28ff1c56-95a0-4e7c-8ebf-fd47dace95d5` | ai | 0.889 | BROKE |
+| RQ01 | malformed | no text field at all | 400 | `—` | — | — | HELD |
+| RQ02 | malformed | no creator_id | 200 | `819c8c31-5ece-4a29-97a9-5c46b271f1c9` | unsure | 0.384 | BROKE |
+| RQ03 | malformed | text is a number | 400 | `—` | — | — | HELD |
+| RQ04 | malformed | text is a list | 400 | `—` | — | — | HELD |
+| RQ05 | malformed | text is null | 400 | `—` | — | — | HELD |
+| RQ06 | malformed | creator_id is an object | 200 | `d439959b-d15e-481f-81e1-bc901186aae9` | human | 0.270 | BROKE |
+| RQ07 | malformed | body is a JSON array, not an object | 500 | `—` | — | — | BROKE |
+| RQ08 | malformed | body is unparseable JSON | 400 | `—` | — | — | HELD |
+| RQ09 | malformed | body is empty | 400 | `—` | — | — | HELD |
+| RQ10 | malformed | body is form-encoded, not JSON | 400 | `—` | — | — | HELD |
+| RQ11 | malformed | body is JSON claiming to be plain text | 400 | `—` | — | — | HELD |
+| RQ12 | malformed | deeply nested JSON | 400 | `—` | — | — | HELD |
+| FL01_01 | flood_same_creator | 20 rapid submissions from one creator | 200 | `1de0b9e6-4cf6-47f7-aeff-be83e30908eb` | human | 0.257 | HELD |
+| FL01_02 | flood_same_creator | 20 rapid submissions from one creator | 200 | `d5f8e1f5-c344-4041-96e8-b660ec0c0149` | human | 0.257 | HELD |
+| FL01_03 | flood_same_creator | 20 rapid submissions from one creator | 200 | `716e1a7d-08d1-4bde-824b-19c5592a4127` | human | 0.257 | HELD |
+| FL01_04 | flood_same_creator | 20 rapid submissions from one creator | 200 | `e77ef715-5847-4124-bc83-d77a41ad2f32` | human | 0.257 | HELD |
+| FL01_05 | flood_same_creator | 20 rapid submissions from one creator | 200 | `3976901e-c2bc-4031-be2d-29b4b8fc7766` | human | 0.257 | HELD |
+| FL01_06 | flood_same_creator | 20 rapid submissions from one creator | 200 | `7710e602-87da-4abb-8e13-6a7114f69520` | human | 0.257 | HELD |
+| FL01_07 | flood_same_creator | 20 rapid submissions from one creator | 200 | `ec24bfc1-d181-4b22-814e-3a13d8d36264` | human | 0.257 | HELD |
+| FL01_08 | flood_same_creator | 20 rapid submissions from one creator | 200 | `60effce4-e2ed-445d-9131-7ac8b8c41719` | human | 0.257 | HELD |
+| FL01_09 | flood_same_creator | 20 rapid submissions from one creator | 200 | `90f93db9-069f-4678-8a91-04c844d793f7` | human | 0.257 | HELD |
+| FL01_10 | flood_same_creator | 20 rapid submissions from one creator | 200 | `d34b02fb-f0de-44b6-86a2-ad39ecfc61ab` | human | 0.257 | HELD |
+| FL01_11 | flood_same_creator | 20 rapid submissions from one creator | 429 | `—` | — | — | HELD |
+| FL01_12 | flood_same_creator | 20 rapid submissions from one creator | 429 | `—` | — | — | HELD |
 
 
 **Did it help, and how do I know:**
 
 <!-- Widening the unsure band usually fixes one problem and creates another.
      Reporting that trade honestly is worth full credit. -->
-
+Yes. Criterion 5 changed from MISSED to MET. Empty and missing text returned 400 in all three trials instead of causing errors. The number of automatic crash failures in the attack run also dropped from 11 to 2. Some malformed cases still fail, so the improvement helped but did not fix every bad-input case.
 
 
 ---
@@ -609,6 +670,8 @@ Mechanism: Invalid inputs were not validated before scoring, causing some to be 
 <!-- For each attack still getting through and each criterion still missed:
      what you'd do, and why you stopped. -->
 
+Evasion and false-positive attacks still fail because the signals do not clearly separate human and AI writing. Some malformed inputs also still cause 500 errors. I would improve the signals and add stronger input validation next.
+
 
 
 **The trade I'd make if this ran for real:**
@@ -616,7 +679,7 @@ Mechanism: Invalid inputs were not validated before scoring, causing some to be 
 <!-- Two sentences. Fewer wrong accusations means more AI text getting through.
      Say which way you'd go and WHO PAYS FOR IT. -->
 
-
+I would prefer fewer false accusations, even if more AI text gets through. This protects real writers from being wrongly accused.
 
 <!-- ═════════════════════════════════════════════════════════════════════
 

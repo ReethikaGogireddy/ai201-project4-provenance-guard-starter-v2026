@@ -207,19 +207,27 @@ def submit():
     text = payload.get("text", "")
     creator_id = payload.get("creator_id", "")
 
+    # Reject missing, empty, or non-string text before scoring
+    if not isinstance(text, str) or not text.strip():
+        audit.log_rejection(
+            creator_id=creator_id,
+            reason="invalid_text"
+        )
+
+        return jsonify({
+            "error": "invalid_text",
+            "message": "Text is required and cannot be empty."
+        }), 400
 
     content_id = str(uuid.uuid4())
-
-    # TODO: delete this and build the route.
-    
 
     model_score = detector.model_signal(text)
 
     style_score = stylometry.style_signal(text)
 
     confidence = scoring.combine_signals(
-    model_score,
-    style_score
+        model_score,
+        style_score
     )
 
     guess, label = scoring.score_to_label(confidence)
