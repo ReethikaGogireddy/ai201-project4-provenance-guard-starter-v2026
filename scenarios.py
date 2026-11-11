@@ -30,21 +30,80 @@ SCENARIOS = [
         # things you actually wrote. This is the criterion that matters most and
         # it's meaningless with someone else's prose.
         "texts": [
-            "REPLACE ME with a paragraph you wrote yourself.",
-            "REPLACE ME with another one. Ten pieces is the usual number.",
+            "The sun, the moon come everyday to tell me that they will be with me at every part of my time.",
+            "The sun is so beautiful during the sunset.",
+            "The moon is so beautiful that I can't stop myself from seeing it.",
+            "I like to walk, when I am thinking for any ideas.",
+            "Studying is a so fun sometimes.",
+            "Learning everything in this era, is the most common thing right now.",
+            "The world is so silent at night and in the morning.",
+            "Doom scrolling is new productivity I guess.",
+            "I am starting to fall in love with the art of writing.",
+            "Health is the real wealth.",
         ],
     },
+
+    {
+        "name": "AI and human score difference",
+        "criterion": 2,
+        "texts": [
+            # Human-generated
+            """Many people think that styding is a waste of time, but I think that
+            is the most important thing. When we study we will know all the
+            inventions or discoveries that happened and we can focus on solving
+            new problem.""",
+
+            # AI-generated
+            """Studying helps people gain knowledge, develop useful skills, and
+            better understand the world around them. It also strengthens abilities
+            such as critical thinking, problem-solving, and communication, which
+            are valuable in both personal and professional life. Education can
+            create new opportunities and help people make more informed decisions.
+            Ultimately, studying is not only about earning good grades but also
+            about developing the knowledge and skills needed for the future.""",
+        ],
+    },
+
     {
         "name": "label coverage",
-        "criterion": 2,
+        "criterion": 3,
         # Inputs spread across your score range, so you can check all three
         # labels are actually reachable.
         "texts": [
-            "REPLACE ME with something you're confident is AI-generated.",
-            "REPLACE ME with something you're confident is human-written.",
-            "REPLACE ME with something genuinely borderline.",
+            # Clearly AI-generated
+            """Studying helps people gain knowledge, develop useful skills, and better
+            understand the world around them. It also strengthens abilities such as
+            critical thinking, problem-solving, and communication, which are valuable
+            in both personal and professional life. Education can create new
+            opportunities and help people make more informed decisions.""",
+
+            # Clearly human-written
+            """Studying will help us understand the world around us. How did we evolve,
+            why did we evolve. How things changed, how they actually effected us.
+            We will learn to understand the world, body, enviroment and more.""",
+
+            # Borderline — lightly edited AI-generated text
+            """Studying helps us learn new things and understand things better.
+            It can also help with problem solving and communication. But everyone
+            studies differently, and sometimes learning from experience can be just
+            as useful as learning from books."""
         ],
     },
+
+    {
+        "name": "missing or empty text",
+        "criterion": 5,
+        "bodies": [
+            {
+                "text": "",
+                "creator_id": "eval_bad_empty"
+            },
+            {
+                "creator_id": "eval_bad_missing"
+            },
+        ],
+    },
+
     # A bad-input criterion looks like this. Uncomment and adjust if that's one
     # of your five — these are raw request bodies, sent exactly as written.
     #
