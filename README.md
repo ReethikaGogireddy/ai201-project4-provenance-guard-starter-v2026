@@ -290,6 +290,7 @@ $ curl "http://127.0.0.1:5000/log?limit=3"
 ## Rate Limiting
 
 **My limits:** ___ per minute, ___ per day
+python run_attacks.py --flood 15
 
 **Why those numbers and not others:**
 <!-- Think about two people: a real writer submitting their own work a few
@@ -297,16 +298,18 @@ $ curl "http://127.0.0.1:5000/log?limit=3"
      thresholds. Your numbers have to be liveable for the first and hostile to
      the second. -->
 
-**What a caller counts as:** <!-- per address, or per creator_id? They fail
-differently — one script can look like a thousand callers, and one household
+I chose 10 requests per minute because it allows a normal writer to submit several pieces of writing without being blocked, while limiting scripts that send many requests quickly. The 200-per-day limit also prevents a single caller from continuously submitting large numbers of requests.
+
+**What a caller counts as:** <!-- per address, or per creator_id? They fail differently — one script can look like a thousand callers, and one household
 can look like one. -->
+A caller is identified by creator_id. If a valid creator_id is not available, the caller's address is used instead.
 
 **The run of status codes when I pushed past it:**
 
 <!-- python run_attacks.py --flood 15 -->
 
 ```
-
+200 200 200 200 200 200 200 200 200 200 429 429 429 429 429
 ```
 
 ---
